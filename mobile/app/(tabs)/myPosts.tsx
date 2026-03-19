@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import Screen from '@/components/Screen'
 
 const MyPosts = () => {
   return (
-    <View>
-      <Text>MyPosts</Text>
-    </View>
+   <Screen>
+    <Text>MyPosts</Text>
+   </Screen>
   )
 }
 

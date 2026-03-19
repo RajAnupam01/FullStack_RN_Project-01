@@ -6,17 +6,21 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  ImageBackground
+  ImageBackground,
+  Alert
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Screen from '@/components/Screen';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { useAuth } from '@/context/useAuth';
 
 
 const Login = () => {
+
+  const {login} = useAuth()
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,16 +30,19 @@ const Login = () => {
   const [focusedInput, setFocusedInput] = useState(null);
 
 
-  const handleRegister = () => {
+  const handleRegister = async() => {
     setLoading(true);
-    try {
-      if (!email || !password) {
+    if (!email || !password) {
         alert('All fields are necessary to register');
         return;
       }
-      console.log(email, password);
-    } catch (error) {
-      console.log(error);
+    try {
+      const res = await login(email,password)
+      Alert.alert(res.message)
+      router.replace("/(tabs)")
+    } catch (error:any) {
+     const message = error?.response?.data?.message || "Login failed";
+     alert(message)
     } finally {
       setLoading(false);
     }

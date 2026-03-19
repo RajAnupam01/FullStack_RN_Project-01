@@ -1,11 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import Screen from '@/components/Screen'
+import { useAuth } from '@/context/useAuth'
 
 const Home = () => {
+  const {user} = useAuth()
   return (
-    <View>
-      <Text>Home</Text>
-    </View>
+    <Screen>
+      <Text>{user?.name}</Text>
+      <Text>{user?.email}</Text>
+    </Screen>
   )
 }
 

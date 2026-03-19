@@ -1,11 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
+import Screen from '@/components/Screen'
+import { useAuth } from '@/context/useAuth'
+import { router } from 'expo-router'
+
+
 
 const Account = () => {
+  const {logout} = useAuth()
+
+
+  const handleLogout = () =>{
+     logout()
+    router.replace("/(auth)/login")
+  }
+
   return (
-    <View>
-      <Text>Account</Text>
-    </View>
+    <Screen>
+      <Text>Profile
+      </Text>
+      <TouchableOpacity onPress={handleLogout} >
+        <Text>Logout</Text>
+      </TouchableOpacity>
+    </Screen>
   )
 }
 

@@ -72,3 +72,15 @@ export const LoginController = AsyncHandler(async (req,res)=>{
 
     return sendTokenResponse(user._id,res,"User logged in successfully.",200)
 })
+
+export const LogoutController = AsyncHandler(async(req,res)=>{
+    if(!req.user || req.user._id){
+        throw new ApiError(401,"unauthorized request")
+    }
+    await User.findByIdAndUpdate(req.user._id,{
+        $unset:{refreshToken:""}
+    })
+    res
+    .status(200)
+    .json(new ApiResponse(200,{},"User logged out successfully."))
+})
