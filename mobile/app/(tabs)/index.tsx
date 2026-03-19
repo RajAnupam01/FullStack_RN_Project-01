@@ -9,6 +9,7 @@ const Home = () => {
     <Screen>
       <Text>{user?.name}</Text>
       <Text>{user?.email}</Text>
+      <Text>{user?.followers}</Text>
     </Screen>
   )
 }
