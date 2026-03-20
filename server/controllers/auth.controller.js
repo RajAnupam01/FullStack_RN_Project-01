@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
+import jwt from 'jsonwebtoken'
 
 
 export const GenerateToken = async (userId) =>{
@@ -83,4 +84,26 @@ export const LogoutController = AsyncHandler(async(req,res)=>{
     res
     .status(200)
     .json(new ApiResponse(200,{},"User logged out successfully."))
+})
+
+export const RegenerateAccessTokenController = AsyncHandler(async(req,res)=>{
+    const incomingRefreshToken = req.header("Authorization")?.replace("Bearer ","");
+    if(!incomingRefreshToken){
+        throw new ApiError(401,"Unauthorized Request.Refresh token missing.")
+    }
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET);
+        const user = await User.findById(decodedToken?._id)
+        if(!user){
+            throw new ApiError(401,"Invalid refresh token")
+        }
+        if(incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401,"Refresh Token is expired or used.")
+        }
+        const {accessToken,refreshToken} = await GenerateToken(user._id);
+        return res
+        .json(new ApiResponse(200,{accessToken,refreshToken},"AccessToken regenrated."))
+    } catch (error) {
+        throw new ApiError(401,error.message)
+    }
 })

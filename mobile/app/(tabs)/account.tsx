@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import Screen from '@/components/Screen'
 import { useAuth } from '@/context/useAuth'
-import { router } from 'expo-router'
+
 
 
 
@@ -12,7 +12,6 @@ const Account = () => {
 
   const handleLogout = () =>{
      logout()
-    router.replace("/(auth)/login")
   }
 
   return (
