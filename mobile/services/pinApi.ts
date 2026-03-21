@@ -5,8 +5,8 @@ export const getAllPins = async() =>{
     return res.data
 }
 
-export const getSinglePin = async()=>{
-    const res = await axiosInstance.get("/pin/single/:id")
+export const getSinglePin = async(id:string)=>{
+    const res = await axiosInstance.get(`/pin/single/${id}`)
     return res.data
 }
 

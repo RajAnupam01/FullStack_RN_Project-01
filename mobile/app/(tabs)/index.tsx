@@ -1,43 +1,55 @@
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import Screen from '@/components/Screen'
-import { getAllPins } from '@/services/pinApi'
+import { FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 
+import Screen from '@/components/Screen';
+import { getAllPins } from '@/services/pinApi';
+import Card from '@/components/card';
+
+
+export type Pin = {
+  _id: string;
+  image: string;
+  title: string;
+  description?: string;
+  category?: string;
+};
 
 const Home = () => {
-  const [pins, setPin] = useState<any[]>([])
+  const [pins, setPins] = useState<Pin[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchPin = async () => {
+    const fetchPins = async () => {
       try {
+        console.log("db calling")
         const res = await getAllPins();
-        setPin(res.data)
-      } catch (error) {
-        console.log(error)
+        console.log("db was calling")
+        setPins(res.data);
+      } catch (err) {
+        console.log(err);
       }
-    }
-    fetchPin()
-  }, [])
+    };
+    fetchPins();
+  }, []);
 
   return (
     <Screen>
-      <ScrollView style={{ marginTop: 5 }}>
-        {pins.map((pin) => (
-          <View key={pin._id} style={{ marginBottom: 20 }}>
-            <Text>{pin.title}</Text>
-            <Text>{pin.description}</Text>
-            <Text>{pin.category}</Text>
-            <Image
-              source={{ uri: pin.image }}
-              style={{ width: 300, height: 300 }}
-            />
-          </View>
-        ))}
-      </ScrollView>
+      <FlatList
+        data={pins}
+        renderItem={({ item }) => (
+          <Card
+            item={item}
+            onPress={() => router.push(`/${item._id}`)} // navigate with id
+          />
+        )}
+        keyExtractor={(item) => item._id}
+        numColumns={2}
+        contentContainerStyle={{ padding: 4 }}
+        showsVerticalScrollIndicator={false}
+      />
     </Screen>
-  )
-}
+  );
+};
 
-export default Home
-
-const styles = StyleSheet.create({})
+export default Home;
