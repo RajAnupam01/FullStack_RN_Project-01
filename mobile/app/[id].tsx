@@ -25,9 +25,10 @@ export default function DetailScreen() {
   useEffect(() => {
     const fetchPin = async () => {
       try {
-        console.log("db called")
+       
+
         const res = await getSinglePin(id);
-        console.log("yes called")
+        
         const data = res.data
         setPin(data)
          Image.getSize(
@@ -52,6 +53,7 @@ export default function DetailScreen() {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size="large" color="#000" />
+        
       </View>
     );
   }
