@@ -45,7 +45,14 @@ const Home = () => {
         )}
         keyExtractor={(item) => item._id}
         numColumns={2}
-        contentContainerStyle={{ padding: 4 }}
+        columnWrapperStyle={{
+          justifyContent: 'space-around',
+          paddingHorizontal: 8,
+        }}
+        contentContainerStyle={{
+          paddingTop: 8,
+          paddingBottom: 16,
+        }}
         showsVerticalScrollIndicator={false}
       />
     </Screen>

@@ -22,9 +22,9 @@ export default Card;
 
 const styles = StyleSheet.create({
   card: {
-    width: 175,
+    width: 155,
     height: 200,
-    margin: 5,
+    marginBottom:10,
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#fff',
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 10,
   },
   image: {
     width: '100%',
