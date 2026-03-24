@@ -1,6 +1,6 @@
 import { FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import Screen from '@/components/Screen';
 import { getAllPins } from '@/services/pinApi';
@@ -18,6 +18,7 @@ export type Pin = {
 const Home = () => {
   const [pins, setPins] = useState<Pin[]>([]);
   const router = useRouter();
+  const {refresh} = useLocalSearchParams()
 
   useEffect(() => {
     const fetchPins = async () => {
@@ -31,7 +32,7 @@ const Home = () => {
       }
     };
     fetchPins();
-  }, []);
+  }, [refresh]);
 
   return (
     <Screen>

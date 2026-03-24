@@ -1,13 +1,14 @@
+import { getTokens } from "@/utils/storage"
 import axiosInstance from "./api"
 
 export const getAllPins = async () => {
-    const res = await axiosInstance.get("/pin/all")
-    return res.data
+  const res = await axiosInstance.get("/pin/all")
+  return res.data
 }
 
 export const getSinglePin = async (id: string) => {
-    const res = await axiosInstance.get(`/pin/single/${id}`)
-    return res.data
+  const res = await axiosInstance.get(`/pin/single/${id}`)
+  return res.data
 }
 
 export const createPin = async (data: any) => {
@@ -17,15 +18,22 @@ export const createPin = async (data: any) => {
   formData.append("description", data.description);
   formData.append("category", data.category);
 
-  const uriParts = data.image.uri.split('.');
-  const fileType = uriParts[uriParts.length - 1];
-
   formData.append("image", {
     uri: data.image.uri,
-    name: `photo.${fileType}`,
-    type: `image/${fileType}`,
+    name: "photo.jpg",
+    type: "image/jpeg",
   } as any);
 
-  const res = await axiosInstance.post("/pin/create", formData);
-  return res.data;
-};
+  const { accessToken } = await getTokens();
+
+  const res = await fetch("http://10.97.3.197:3000/api/pin/create", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  });
+
+  const result = await res.json();
+  return result;
+};;
