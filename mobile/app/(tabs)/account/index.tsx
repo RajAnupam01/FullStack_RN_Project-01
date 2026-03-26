@@ -4,31 +4,38 @@ import Screen from '@/components/Screen'
 import { router } from 'expo-router'
 import Saved from './saved'
 import Created from './created'
+import { useAuth } from '@/context/useAuth'
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState(1)
+  const { user, logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+  }
+
   return (
     <Screen>
       <View style={styles.container}>
         <View style={styles.header}></View>
         <View style={styles.avatar} >
-          <Image source={{ uri: 'https://nationaltoday.com/wp-content/uploads/2022/11/456841263-min-1200x834.jpg' }} style={styles.avatarimg} />
+          <Image source={{ uri: user?.avatar }} style={styles.avatarimg} />
         </View>
-        <Text style={styles.txt1} >Alexa Bliss</Text>
-        <Text style={styles.txt2} >BlissAlexa@gmail.com</Text>
+        <Text style={styles.txt1} >{user?.name}</Text>
+        <Text style={styles.txt2} >{user?.email}</Text>
         <View style={styles.subtxtstyle} >
-          <Text style={styles.subtxt}>Followers:05  |</Text>
-          <Text style={styles.subtxt} >  Following:12</Text>
+          <Text style={styles.subtxt}>Followers{user?.followers}  |</Text>
+          <Text style={styles.subtxt} >  Following{user?.following}</Text>
         </View>
         <View style={styles.card1}>
           <TouchableOpacity style={styles.btn1} onPress={() => router.push('/(tabs)/account/profile')} >
             <Text style={styles.btntxt}>Edit Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.btn1} >
-            <Text style={styles.btntxt}>Share</Text>
+            <Text style={styles.btntxt}>Delete Account</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btn1} >
-            <Text style={styles.btntxt}>Settings</Text>
+          <TouchableOpacity style={styles.btn1}  onPress={handleLogout} >
+            <Text style={styles.btntxt}>Logout</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.card2}>

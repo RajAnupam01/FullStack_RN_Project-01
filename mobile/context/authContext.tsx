@@ -1,5 +1,5 @@
 import { LoginUser, LogoutUser, RegisterUser } from "@/services/authApi";
-import { getMyProfile } from "@/services/userApi";
+import { ChangeMyProfile, getMyProfile } from "@/services/userApi";
 import { getTokens } from "@/utils/storage";
 import { router } from "expo-router";
 import { createContext, useEffect, useState } from "react";
@@ -9,6 +9,7 @@ type AuthContextType = {
     loading: boolean,
     register: (name: string, email: string, password: string) => Promise<any>
     login: (email: string, password: string) => Promise<any>
+    updateUser:(name:string,email:string,avatar:any) => Promise<any>
     logout: () => void
 }
 
@@ -52,6 +53,13 @@ export const AuthProvider = ({ children }: any) => {
         return res;
     }
 
+    const updateUser = async(name:string, email:string, avatar:string) =>{
+        const res = await ChangeMyProfile({name,email,avatar});
+        setUser(res.data)
+
+        return res
+    }
+
     const logout = async () => {
         await LogoutUser(null)
         setUser(null)
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }: any) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, register, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, register, login, logout,updateUser }}>
             {children}
         </AuthContext.Provider>
     )
