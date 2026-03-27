@@ -37,3 +37,18 @@ export const createPin = async (data: any) => {
   const result = await res.json();
   return result;
 };;
+
+export const toggleSaveUnSavePin = async(pinId:string) =>{
+  const res = await axiosInstance.post(`/pin/toggleSaveUnSavePin/${pinId}`)
+  return res.data
+}
+
+export const getToggleSavedUnsavedPin = async() =>{
+  const res = await axiosInstance.get("/pin/getSaveUnSavePin")
+   return res.data
+}
+
+export const getCreatedPin = async() =>{
+  const res = await axiosInstance.get("/pin/getCreatedPins")
+   return res.data
+}

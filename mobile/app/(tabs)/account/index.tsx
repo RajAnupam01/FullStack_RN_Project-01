@@ -34,7 +34,7 @@ const Index = () => {
           <TouchableOpacity style={styles.btn1} >
             <Text style={styles.btntxt}>Delete Account</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btn1}  onPress={handleLogout} >
+          <TouchableOpacity style={styles.btn1} onPress={handleLogout} >
             <Text style={styles.btntxt}>Logout</Text>
           </TouchableOpacity>
         </View>
@@ -59,8 +59,14 @@ const Index = () => {
             <Text style={styles.btntxt}>Created</Text>
           </TouchableOpacity>
         </View>
-        {activeTab === 0 && <Created />}
-        {activeTab === 1 && <Saved />}
+        <View style={{ display: activeTab === 0 ? 'flex' : 'none' }}>
+          <Saved />
+        </View>
+
+        <View style={{ display: activeTab === 1 ? 'flex' : 'none' }}>
+          <Created />
+        </View>
+
       </View>
     </Screen>
   )

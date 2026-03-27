@@ -5,13 +5,16 @@ import { Pin } from "../app/(tabs)/index"
 type CardProps = {
   item: Pin;
   onPress: () => void;
+  isHome: boolean
 };
 
-const Card = ({ item, onPress }: CardProps) => {
-  
+const Card = ({ item, onPress, isHome = false }: CardProps) => {
+  const cardStyle = isHome
+    ? { width: 155, height: 200 }   
+    : { width: 130, height: 160 };  
   return (
     <Pressable onPress={onPress}>
-      <View style={styles.card}>
+      <View style={[styles.card,cardStyle]}>
         <Image source={{ uri: item.image }} style={styles.image} resizeMode="cover" />
       </View>
     </Pressable>
@@ -22,9 +25,8 @@ export default Card;
 
 const styles = StyleSheet.create({
   card: {
-    width: 155,
-    height: 200,
-    marginBottom:10,
+    marginVertical: 10,
+    marginHorizontal:8,
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#fff',

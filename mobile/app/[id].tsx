@@ -1,7 +1,7 @@
-import { View, Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Image, Text, StyleSheet, ActivityIndicator,TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { getSinglePin } from '@/services/pinApi';
+import { getSinglePin, toggleSaveUnSavePin } from '@/services/pinApi';
 import Screen from '@/components/Screen';
 
 type Pin = {
@@ -21,12 +21,22 @@ export default function DetailScreen() {
   const [pin, setPin] = useState<Pin | null>(null);
   const [loading, setLoading] = useState(true);
   const [ratio,setRatio] = useState(1)
+  const [saved, setSaved] = useState(false)
+
+  const handleToggle = async ()=>{
+    try {
+      const pinId = id as string
+      await toggleSaveUnSavePin(pinId);
+      setSaved(prev => !prev)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     const fetchPin = async () => {
       try {
        
-
         const res = await getSinglePin(id);
         
         const data = res.data
@@ -70,6 +80,9 @@ export default function DetailScreen() {
     <Screen>
       <View style={styles.container}>
         <Image source={{ uri: pin.image }} style={[styles.image,{aspectRatio:ratio}]} resizeMode="cover" />
+        <TouchableOpacity style={styles.savedBtn} onPress={handleToggle} >
+          <Text style={styles.savedBtnTxt} >{saved ?"unsave":"saved"}</Text>
+        </TouchableOpacity>
         <Text style={styles.title}>{pin.title}</Text>
         {pin.description && <Text style={styles.text}>{pin.description}</Text>}
         {pin.category && <Text style={styles.text}>{pin.category}</Text>}
@@ -102,4 +115,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 8
   },
+  savedBtn:{
+    marginVertical:10,
+    marginHorizontal:16,
+    backgroundColor:'black',
+    width:"20%",
+    padding:10
+  },
+  savedBtnTxt:{
+    color:'white',
+    fontSize:16,
+    textAlign:'center'
+  }
 });
