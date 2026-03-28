@@ -43,6 +43,11 @@ export const toggleSaveUnSavePin = async(pinId:string) =>{
   return res.data
 }
 
+export const toggleLikeUnLikePin = async(pinId:string) =>{
+  const res = await axiosInstance.post(`/pin/toggleLikeUnLikePin/${pinId}`)
+  return res.data
+}
+
 export const getToggleSavedUnsavedPin = async() =>{
   const res = await axiosInstance.get("/pin/getSaveUnSavePin")
    return res.data

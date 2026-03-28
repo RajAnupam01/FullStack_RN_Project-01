@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import Entypo from '@expo/vector-icons/Entypo';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Fontisto from '@expo/vector-icons/Fontisto';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 export default function TabsLayout() {
@@ -32,9 +31,9 @@ export default function TabsLayout() {
                     <AntDesign name="plus-circle" size={26} color={color} />
                 )
             }} />
-            <Tabs.Screen name="myPosts" options={{title:'MyPosts',
+            <Tabs.Screen name="inbox" options={{title:'inbox',
                 tabBarIcon:({color})=>(
-                    <Fontisto name="history" size={26} color={color} />
+                    <AntDesign name="message" size={26} color={color} />
                 )
             }} />
              <Tabs.Screen name="account" options={{title:'Profile',
