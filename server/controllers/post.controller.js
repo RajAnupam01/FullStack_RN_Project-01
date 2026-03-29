@@ -135,8 +135,40 @@ export const getCreatedPins = AsyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found.")
     }
 
-   const pins = await Pin.find({ owner: userId }).sort({ createdAt: -1 });
+    const pins = await Pin.find({ owner: userId }).sort({ createdAt: -1 });
     return res.status(200).json(
         new ApiResponse(200, pins, "User pins fetched successfully.")
     );
+})
+
+export const toggleLikePin = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const pinId = req.params.id;
+
+    const pin = await Pin.findById(pinId);
+    if (!pin) {
+        throw new ApiError(404, "Pin not found.")
+    }
+
+    const isliked = pin.likes.some(
+        id => id.equals(userId)
+    )
+    if (isliked) {
+        pin.likes.pull(userId)
+    } else {
+        pin.likes.push(userId)
+    }
+
+    await pin.save({ validateBeforeSave: true })
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                liked: !isliked,
+                totalLikes: pin.likes.length
+            },
+            isliked ? "Unliked" : "liked"
+        )
+    )
 })

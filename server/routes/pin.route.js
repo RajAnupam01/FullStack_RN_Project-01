@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { verifyJWT } from '../middlewares/auth.middleware.js';
-import { createPin, getAllPins, getCategoryPins, getCreatedPins, getOnePin, getSavedPins, toggleSavePin } from '../controllers/post.controller.js';
+import { createPin, getAllPins, getCategoryPins, getCreatedPins, getOnePin, getSavedPins, toggleLikePin, toggleSavePin } from '../controllers/post.controller.js';
 import { upload } from '../middlewares/multer.middleware.js';
 
 export const router = Router();
@@ -12,3 +12,4 @@ router.route("/category").get(verifyJWT,getCategoryPins)
 router.route("/toggleSaveUnSavePin/:id").post(verifyJWT,toggleSavePin)
 router.route("/getSaveUnSavePin").get(verifyJWT,getSavedPins)
 router.route("/getCreatedPins").get(verifyJWT,getCreatedPins)
+router.route("/toggleLikeUnLikePin/:id").post(verifyJWT,toggleLikePin)
