@@ -5,13 +5,14 @@ import { Pin } from "../app/(tabs)/index"
 type CardProps = {
   item: Pin;
   onPress: () => void;
-  isHome: boolean
+  isHome:boolean
 };
 
-const Card = ({ item, onPress, isHome = false }: CardProps) => {
-  const cardStyle = isHome
-    ? { width: 155, height: 200 }   
-    : { width: 130, height: 160 };  
+const Card = ({ item, onPress,isHome=false }: CardProps) => {
+    const cardStyle = isHome
+    ? { width: 155, height: 180 ,marginVertical:12,marginHorizontal:8}   
+    : { width: 130, height: 150,marginVertical:20, marginHorizontal:20 };  
+   
   return (
     <Pressable onPress={onPress}>
       <View style={[styles.card,cardStyle]}>
@@ -25,8 +26,6 @@ export default Card;
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 10,
-    marginHorizontal:8,
     borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#fff',

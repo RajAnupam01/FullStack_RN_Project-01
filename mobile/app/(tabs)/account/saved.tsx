@@ -18,11 +18,10 @@ const saved = () => {
   const {refresh} = useLocalSearchParams()
 
     useEffect(() => {
-       if (pins.length > 0) return;
+       
       const fetchPins = async () => {
         try {
           const res = await getToggleSavedUnsavedPin();
-          console.log('db call')
           setPins(res.data);
         } catch (err) {
           console.log(err);

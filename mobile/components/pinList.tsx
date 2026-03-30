@@ -11,7 +11,7 @@ type Pin = {
 
 type Props = {
   data: Pin[];
-  isHome?:boolean;
+  isHome?: boolean
 };
 
 const PinList = ({ data,isHome=false }: Props) => {
@@ -22,20 +22,16 @@ const PinList = ({ data,isHome=false }: Props) => {
       data={data}
       renderItem={({ item }) => (
         <Card
-          item={item}
           isHome={isHome}
+          item={item}
           onPress={() => router.push(`/${item._id}`)}
         />
       )}
       keyExtractor={(item) => item._id}
       numColumns={2}
       columnWrapperStyle={{
-        justifyContent: 'space-around',
-        paddingHorizontal: 8,
-      }}
-      contentContainerStyle={{
-        paddingTop: 8,
-        paddingBottom: 16,
+        justifyContent: 'space-evenly',
+
       }}
       showsVerticalScrollIndicator={false}
     />

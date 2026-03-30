@@ -1,8 +1,9 @@
-import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { getSinglePin, toggleLikeUnLikePin, toggleSaveUnSavePin } from '@/services/pinApi';
 import Screen from '@/components/Screen';
+import { useAuth } from '@/context/useAuth';
 
 type Pin = {
   id: string;
@@ -10,6 +11,11 @@ type Pin = {
   title: string;
   description?: string;
   category?: string;
+  owner: {
+    id: string,
+    name: string,
+    avatar?: string
+  }
 };
 
 type Params = {
@@ -24,6 +30,7 @@ export default function DetailScreen() {
   const [saved, setSaved] = useState(false)
   const [like, setLike] = useState(0)
 
+  const { user } = useAuth()
   const handleToggle = async () => {
     try {
       const pinId = id as string
@@ -48,7 +55,7 @@ export default function DetailScreen() {
       try {
 
         const res = await getSinglePin(id);
-
+        console.log(res)
         const data = res.data
         setPin(data)
         setLike(data.likes?.length || 0)
@@ -90,8 +97,26 @@ export default function DetailScreen() {
 
   return (
     <Screen>
-      <View style={styles.container}>
+      <ScrollView style={styles.container}
+      showsVerticalScrollIndicator={false}
+      >
         <Image source={{ uri: pin.image }} style={[styles.image, { aspectRatio: ratio }]} resizeMode="cover" />
+        <View style={styles.avatarFrame}>
+          <View style={styles.avatar}>
+            {pin.owner?.avatar ? (
+              <Image
+                source={{ uri: pin.owner.avatar }}
+                style={styles.avatarimg}
+              />
+            ) : (
+              <Text style={styles.initial}>
+                {pin.owner?.name?.charAt(0).toUpperCase()}
+              </Text>
+            )}
+          </View>
+
+          <Text>{pin.owner?.name}</Text>
+        </View>
         <View style={styles.action} >
           <TouchableOpacity style={styles.savedBtn} onPress={handleToggle} >
             <Text style={styles.savedBtnTxt} >{saved ? "unsave" : "saved"}</Text>
@@ -103,8 +128,14 @@ export default function DetailScreen() {
         <Text style={styles.title}>{pin.title}</Text>
         {pin.description && <Text style={styles.text}>{pin.description}</Text>}
         {pin.category && <Text style={styles.text}>{pin.category}</Text>}
+        <View style={[styles.avatarFrame, {marginBottom:20}]} >
+          <View style={styles.avatar} >
+            <Image source={{ uri: user?.avatar }} style={styles.avatarimg} />
+          </View>
+          <Text>{user.name}</Text>
+        </View>
 
-      </View>
+      </ScrollView>
     </Screen>
   );
 }
@@ -112,17 +143,47 @@ export default function DetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+  
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
-
   },
   image: {
     width: "100%",
   },
+  avatarFrame: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  avatar: {
+    marginLeft: 12,
+    marginTop: 12,
+    height: 40,
+    width: 40,
+    backgroundColor: '#b3b1b1',
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'black',
+    overflow: 'hidden'
+  },
+  avatarimg: {
+    width: '100%',
+    height: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    resizeMode: 'cover'
+  },
+  initial: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+},
   title: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -140,24 +201,24 @@ const styles = StyleSheet.create({
     width: "20%",
     padding: 10
   },
-  likebtn:{
-    marginVertical:10,
+  likebtn: {
+    marginVertical: 10,
     marginHorizontal: 16,
-    backgroundColor:'#e60023',
-    width:"20%",
-    padding:10
+    backgroundColor: '#e60023',
+    width: "20%",
+    padding: 10
   },
   savedBtnTxt: {
     color: 'white',
     fontSize: 16,
     textAlign: 'center'
   },
-  likedbtn:{
-    color:'white',
-    textAlign:'center'
+  likedbtn: {
+    color: 'white',
+    textAlign: 'center'
   },
   action: {
     flexDirection: 'row',
-    justifyContent:'space-between'
+    justifyContent: 'space-between'
   }
 });

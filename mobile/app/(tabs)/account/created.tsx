@@ -21,11 +21,11 @@ const created = () => {
   const { refresh } = useLocalSearchParams()
 
   useEffect(() => {
-     if (pins.length > 0) return;
+  
     const fetchPins = async () => {
       try {
         const res = await getCreatedPin();
-        console.log('db called2')
+       console.log("DATA LENGTH:", res.data.length);
         setPins(res.data);
       } catch (err) {
         console.log(err);
@@ -38,9 +38,9 @@ const created = () => {
 
 
   return (
-    <Screen>
-      <PinList data={pins} />
-    </Screen>
+   <Screen>
+    <PinList data={pins} />
+   </Screen>
   )
 }
 

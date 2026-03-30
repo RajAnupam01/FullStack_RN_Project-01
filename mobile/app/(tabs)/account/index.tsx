@@ -18,8 +18,14 @@ const Index = () => {
     <Screen>
       <View style={styles.container}>
         <View style={styles.header}></View>
-        <View style={styles.avatar} >
-          <Image source={{ uri: user?.avatar }} style={styles.avatarimg} />
+        <View style={styles.avatar}>
+          {user?.avatar ? (
+            <Image source={{ uri: user.avatar }} style={styles.avatarimg} />
+          ) : (
+            <Text style={styles.initial}>
+              {user?.name?.charAt(0)?.toUpperCase() || "U"}
+            </Text>
+          )}
         </View>
         <Text style={styles.txt1} >{user?.name}</Text>
         <Text style={styles.txt2} >{user?.email}</Text>
@@ -59,13 +65,8 @@ const Index = () => {
             <Text style={styles.btntxt}>Created</Text>
           </TouchableOpacity>
         </View>
-        <View style={{ display: activeTab === 0 ? 'flex' : 'none' }}>
-          <Saved />
-        </View>
-
-        <View style={{ display: activeTab === 1 ? 'flex' : 'none' }}>
-          <Created />
-        </View>
+        {activeTab === 0 && <Saved />}
+        {activeTab === 1 && <Created />}
 
       </View>
     </Screen>
@@ -84,6 +85,11 @@ const styles = StyleSheet.create({
     height: "16%",
     backgroundColor: '#b3b1b1'
   },
+  initial: {
+  color: "#fff",
+  fontSize: 22,
+  fontWeight: "bold",
+},
   avatar: {
     height: 150,
     width: 150,

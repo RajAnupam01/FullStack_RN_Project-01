@@ -51,7 +51,7 @@ export const getOnePin = AsyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(pinId)) {
         throw new ApiError(400, "Invalid Pin Id")
     }
-    const pin = await Pin.findById(pinId)
+    const pin = await Pin.findById(pinId).populate("owner", "name avatar");
 
     if (!pin) {
         throw new ApiError(404, "No such Pin Exists.")
