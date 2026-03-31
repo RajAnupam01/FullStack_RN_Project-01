@@ -115,6 +115,59 @@ export const toggleSavePin = AsyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, isSaved ? "Pin Saved" : "Pin Unsaved."))
 })
 
+export const toggleFollow = AsyncHandler(async (req, res) => {
+   const userId = req.user._id;
+   const targetId = req.params.id;
+   
+   const currentUser = await User.findById(userId);
+   if (!currentUser) {
+      throw new ApiError(404, "Current user not found");
+   }
+
+   const targetUser = await User.findById(targetId);
+   if (!targetUser) {
+      throw new ApiError(404, "This user doesn't exist.");
+   }
+
+   if (userId.toString() === targetId) {
+      throw new ApiError(400, "You cannot follow yourself.");
+   }
+   
+   const isFollowing = currentUser.following.some(
+     id => id.toString() === targetId
+   );
+
+   if (isFollowing) {
+      // UNFOLLOW
+      await User.findByIdAndUpdate(userId, {
+         $pull: { following: targetId }
+      });
+
+      await User.findByIdAndUpdate(targetId, {
+         $pull: { followers: userId }
+      });
+
+   } else {
+      // FOLLOW
+      await User.findByIdAndUpdate(userId, {
+         $addToSet: { following: targetId }
+      });
+
+      await User.findByIdAndUpdate(targetId, {
+         $addToSet: { followers: userId }
+      });
+   }
+
+   res.status(200).json(
+      new ApiResponse(
+         200,
+         { isFollowing: !isFollowing },
+         isFollowing
+            ? "User unfollowed successfully"
+            : "User followed successfully"
+      )
+   );
+});
 
 export const getSavedPins = AsyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -172,3 +225,4 @@ export const toggleLikePin = AsyncHandler(async (req, res) => {
         )
     )
 })
+

@@ -9,8 +9,9 @@ type AuthContextType = {
     loading: boolean,
     register: (name: string, email: string, password: string) => Promise<any>
     login: (email: string, password: string) => Promise<any>
-    updateUser:(name:string,email:string,avatar:any) => Promise<any>
+    updateUser: (name: string, email: string, avatar: any) => Promise<any>
     logout: () => void
+    setUser: React.Dispatch<React.SetStateAction<any>>
 }
 
 
@@ -53,8 +54,8 @@ export const AuthProvider = ({ children }: any) => {
         return res;
     }
 
-    const updateUser = async(name:string, email:string, avatar:string) =>{
-        const res = await ChangeMyProfile({name,email,avatar});
+    const updateUser = async (name: string, email: string, avatar: string) => {
+        const res = await ChangeMyProfile({ name, email, avatar });
         setUser(res.data)
 
         return res
@@ -67,7 +68,7 @@ export const AuthProvider = ({ children }: any) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, register, login, logout,updateUser }}>
+        <AuthContext.Provider value={{ user, loading, setUser, register, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     )

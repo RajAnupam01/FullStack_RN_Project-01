@@ -13,7 +13,6 @@ const Index = () => {
   const handleLogout = () => {
     logout()
   }
-
   return (
     <Screen>
       <View style={styles.container}>
@@ -30,8 +29,12 @@ const Index = () => {
         <Text style={styles.txt1} >{user?.name}</Text>
         <Text style={styles.txt2} >{user?.email}</Text>
         <View style={styles.subtxtstyle} >
-          <Text style={styles.subtxt}>Followers{user?.followers}  |</Text>
-          <Text style={styles.subtxt} >  Following{user?.following}</Text>
+          <Text style={styles.subtxt}>
+            Followers  {user?.followers?.length || 0}  
+          </Text>
+          <Text style={styles.subtxt}>
+              Following  {user?.following?.length || 0}
+          </Text>
         </View>
         <View style={styles.card1}>
           <TouchableOpacity style={styles.btn1} onPress={() => router.push('/(tabs)/account/profile')} >
@@ -86,10 +89,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#b3b1b1'
   },
   initial: {
-  color: "#fff",
-  fontSize: 22,
-  fontWeight: "bold",
-},
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
   avatar: {
     height: 150,
     width: 150,
@@ -123,7 +126,8 @@ const styles = StyleSheet.create({
   },
   subtxtstyle: {
     flexDirection: 'row',
-    marginTop: 5
+    marginTop: 5,
+    gap:10
   },
   subtxt: {
     fontSize: 14,

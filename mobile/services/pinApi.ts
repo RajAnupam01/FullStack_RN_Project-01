@@ -57,3 +57,8 @@ export const getCreatedPin = async() =>{
   const res = await axiosInstance.get("/pin/getCreatedPins")
    return res.data
 }
+
+export const toggleFollow = async(targetId:string) =>{
+  const res  = await axiosInstance.post(`/pin/toggleFollow/${targetId}`)
+  return res.data
+}
