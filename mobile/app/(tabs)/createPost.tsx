@@ -2,17 +2,22 @@ import { Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View, 
 import React, { useState } from 'react'
 import Screen from '@/components/Screen'
 import * as ImagePicker from "expo-image-picker"
-import { createPin } from '@/services/pinApi'
+import { useCreatePin } from '@/hooks/useCreatePin'
 import { router } from 'expo-router'
 
+
 const CreatePost = () => {
+
+  const {mutate:createPinMutation, isPending} = useCreatePin()
+
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState("")
   const [image, setImage] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
 
+
+  
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -30,24 +35,24 @@ const CreatePost = () => {
       alert("All fields are required.")
       return
     }
-    try {
-      setLoading(true)
-      const res = await createPin({ title, description, category, image })
-      alert(res.message)
-      setTitle("");
-      setDescription("");
-      setCategory("");
-      setImage(null);
-      router.replace({
-        pathname:'/(tabs)',
-        params:{refresh:Date.now().toString()}
-      })
-    } catch (error: any) {
-      const message = error?.response?.data?.message || error?.message || "Creation failed."
-      alert(message)
-    } finally {
-      setLoading(false)
-    }
+    createPinMutation(
+      {title,description,category,image},
+      {
+        onSuccess:(res) => {
+          alert(res.message);
+          setTitle('')
+          setDescription('')
+          setCategory('')
+          setImage(null)
+
+          router.back()
+        },
+        onError:(error:any) =>{
+          const message =  error?.response?.data?.message || error?.message || "Creation failed.";
+          alert(message)
+        }
+      }
+    )
   }
 
   return (
@@ -99,9 +104,9 @@ const CreatePost = () => {
           <TouchableOpacity 
             style={styles.button} 
             onPress={handleSubmitPin} 
-            disabled={loading}
+            disabled={isPending}
           >
-            {loading ? (
+            {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Submit</Text>

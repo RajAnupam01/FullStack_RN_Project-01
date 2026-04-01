@@ -1,45 +1,32 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
 import Screen from '@/components/Screen'
 import PinList from '@/components/pinList'
-import { useLocalSearchParams } from 'expo-router'
-import { getCreatedPin } from '@/services/pinApi'
-
-
-type Pin = {
-  _id: string;
-  image: string;
-  title: string;
-  description?: string;
-  category?: string;
-}
-
-
+import { useCreatedPin } from '@/hooks/useCreatedPin'
+import { ActivityIndicator, View,Text } from 'react-native';
 const created = () => {
 
-  const [pins, setPins] = useState<Pin[]>([])
-  const { refresh } = useLocalSearchParams()
+ const {data:pins,isLoading, isError,refetch, isFetching} = useCreatedPin();
+ if(isLoading){
+  return(
+    <View style={{flex:1, justifyContent:'center'}} >
+      <ActivityIndicator/>
+    </View>
+  )
+ }
 
-  useEffect(() => {
-  
-    const fetchPins = async () => {
-      try {
-        const res = await getCreatedPin();
-       console.log("DATA LENGTH:", res.data.length);
-        setPins(res.data);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchPins();
-  }, [refresh]);
-
-
+ if(isError){
+  return (
+    <View>
+      <Text>Something went wrong</Text>
+      <Text onPress={()=>refetch()}>Retry</Text>
+    </View>
+  )
+ }
 
 
   return (
    <Screen>
-    <PinList data={pins} />
+     {isFetching && <ActivityIndicator size="small" />}
+    <PinList data={pins || []} />
    </Screen>
   )
 }

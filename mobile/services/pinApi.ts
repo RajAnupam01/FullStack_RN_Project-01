@@ -1,5 +1,5 @@
 import { getTokens } from "@/utils/storage"
-import axiosInstance from "./api"
+import axiosInstance, { BASE_URL } from "./api"
 
 export const getAllPins = async () => {
   const res = await axiosInstance.get("/pin/all")
@@ -26,7 +26,7 @@ export const createPin = async (data: any) => {
 
   const { accessToken } = await getTokens();
 
-  const res = await fetch("http://10.97.3.197:3000/api/pin/create", {
+  const res = await fetch(`${BASE_URL}/pin/create`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,

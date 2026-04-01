@@ -1,3 +1,4 @@
+import { queryClient } from "@/lib/queryClient";
 import { LoginUser, LogoutUser, RegisterUser } from "@/services/authApi";
 import { ChangeMyProfile, getMyProfile } from "@/services/userApi";
 import { getTokens } from "@/utils/storage";
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }: any) => {
         await LogoutUser(null)
         setUser(null)
         router.replace("/login");
+        queryClient.clear()
     }
 
     return (
