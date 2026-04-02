@@ -1,172 +1,29 @@
-import {
-  View,
-  Image,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  ScrollView
-} from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
-import {
-  getSinglePin,
-  toggleFollow,
-  toggleLikeUnLikePin,
-  toggleSaveUnSavePin
-} from '@/services/pinApi';
+import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import Screen from '@/components/Screen';
+import { useLocalSearchParams } from 'expo-router';
+import { useSinglePin } from '@/hooks/useSinglePin';
+import { usePinAction } from '@/hooks/usePinAction';
 import { useAuth } from '@/context/useAuth';
 
-type Pin = {
-  id: string;
-  image: string;
-  title: string;
-  description?: string;
-  category?: string;
-  owner: {
-    _id: string;
-    name: string;
-    avatar?: string;
-  };
-};
 
-type Params = {
-  id: string;
-};
+const DetailScreen = () => {
 
-export default function DetailScreen() {
-  const { id } = useLocalSearchParams<Params>();
-  const { user, setUser } = useAuth();
+  const {user} = useAuth()
 
-  const [pin, setPin] = useState<Pin | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [ratio, setRatio] = useState(1);
-  const [saved, setSaved] = useState(false);
-  const [like, setLike] = useState(0);
-  const [followingUsers, setFollowingUsers] = useState<string[]>([]);
+  const { id } = useLocalSearchParams();
 
-  // ✅ correct check
-  const isFollowing = pin
-    ? followingUsers.includes(pin.owner._id)
-    : false;
+  const { data: pin, isLoading } = useSinglePin(id as string)
+  console.log(pin)
 
-  // ✅ run only once (important fix)
-  useEffect(() => {
-    if (user?.following) {
-      setFollowingUsers(user.following);
-    }
-  }, []);
+  const { likeMutation, followMutation, saveMutation } = usePinAction(id as string)
 
-const handleFollow = async () => {
-  if (!pin) return;
-
-  try {
-    const ownerId = pin.owner._id;
-
-    const res = await toggleFollow(ownerId);
-
-    // ✅ update local state (DetailScreen)
-    setFollowingUsers(prev => {
-      if (res.data.isFollowing) {
-        if (prev.includes(ownerId)) return prev;
-        return [...prev, ownerId];
-      } else {
-        return prev.filter(id => id !== ownerId);
-      }
-    });
-
-    // 🔥 IMPORTANT: update global user (AuthContext)
-    setUser((prev: any) => {
-      if (!prev) return prev;
-
-      if (res.data.isFollowing) {
-        if (prev.following.includes(ownerId)) return prev;
-
-        return {
-          ...prev,
-          following: [...prev.following, ownerId],
-        };
-      } else {
-        return {
-          ...prev,
-          following: prev.following.filter(
-            (id: string) => id !== ownerId
-          ),
-        };
-      }
-    });
-
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-  const handleToggle = async () => {
-    try {
-      const pinId = id as string;
-      await toggleSaveUnSavePin(pinId);
-      setSaved(prev => !prev);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleLike = async () => {
-    try {
-      const pinId = id as string;
-      const res = await toggleLikeUnLikePin(pinId);
-      setLike(res.data.totalLikes);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchPin = async () => {
-      try {
-        const res = await getSinglePin(id);
-        const data = res.data;
-
-        setPin(data);
-        setLike(data.likes?.length || 0);
-
-        Image.getSize(
-          data.image,
-          (width, height) => {
-            setRatio(width / height);
-          },
-          (error) => {
-            console.log("Image size error:", error);
-          }
-        );
-
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPin();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
+  if (isLoading) {
+    return <ActivityIndicator />
   }
 
   if (!pin) {
-    return (
-      <View style={styles.loader}>
-        <Text>Pin not found</Text>
-      </View>
-    );
+    return <Text>Not found.</Text>
   }
-
   return (
     <Screen>
       <ScrollView
@@ -175,7 +32,7 @@ const handleFollow = async () => {
       >
         <Image
           source={{ uri: pin.image }}
-          style={[styles.image, { aspectRatio: ratio }]}
+          style={styles.image}
           resizeMode="cover"
         />
 
@@ -200,11 +57,11 @@ const handleFollow = async () => {
           </View>
 
           <TouchableOpacity
-            onPress={handleFollow}
+            onPress={()=> followMutation.mutate(pin.owner._id)}
             style={styles.followBtn}
           >
             <Text style={styles.followBtnTxt}>
-              {isFollowing ? "Unfollow" : "Follow"}
+              {pin.isFollowing ? "Unfollow" : "Follow"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -212,19 +69,19 @@ const handleFollow = async () => {
         <View style={styles.action}>
           <TouchableOpacity
             style={styles.savedBtn}
-            onPress={handleToggle}
+            onPress={()=> saveMutation.mutate()}
           >
             <Text style={styles.savedBtnTxt}>
-              {saved ? "Unsave" : "Save"}
+              {pin.isSaved ? "Unsave" : "Save"}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={handleLike}
+            onPress={()=>likeMutation.mutate()}
             style={styles.likebtn}
           >
             <Text style={styles.likedbtn}>
-              Like: {like}
+             Like: {pin.likes.length}
             </Text>
           </TouchableOpacity>
         </View>
@@ -255,10 +112,12 @@ const handleFollow = async () => {
   );
 }
 
+export default DetailScreen;
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  image: { width: '100%' },
+  image: { width: '100%' ,height:'150%'},
   mainFrame: {
     flexDirection: 'row',
     justifyContent: 'space-between',

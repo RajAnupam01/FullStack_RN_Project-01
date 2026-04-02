@@ -1,38 +1,31 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useLocalSearchParams } from 'expo-router';
-import { getToggleSavedUnsavedPin } from '@/services/pinApi';
+import { ActivityIndicator, Text, View } from 'react-native'
 import Screen from '@/components/Screen';
 import PinList from '@/components/pinList';
+import { useSavedPin } from '@/hooks/useSaved';
 
-type Pin ={
-  _id: string;
-  image: string;
-  title: string;
-  description?: string;
-  category?: string;
-}
+
 
 const saved = () => {
-  const [pins, setPins] = useState<Pin[]>([])
-  const {refresh} = useLocalSearchParams()
-
-    useEffect(() => {
-       
-      const fetchPins = async () => {
-        try {
-          const res = await getToggleSavedUnsavedPin();
-          setPins(res.data);
-        } catch (err) {
-          console.log(err);
-        }
-      };
-      fetchPins();
-    }, [refresh]);
-  
+  const {data:pins,isLoading, isError, refetch,isFetching} = useSavedPin();
+  if(isLoading){
+    return (
+      <View style={{flex:1,justifyContent:'center'}} >
+        <ActivityIndicator/>
+      </View>
+    )
+  }
+  if(isError){
+    return(
+      <View>
+        <Text>Something went wrong</Text>
+        <Text onPress={()=>refetch()}></Text>
+      </View>
+    )
+  }
   return (
     <Screen>
-      <PinList data={pins} />
+      {isFetching && <ActivityIndicator size="small" />}
+      <PinList data={pins || []} />
     </Screen>
   )
 }
