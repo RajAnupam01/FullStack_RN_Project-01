@@ -6,8 +6,6 @@ export const usePinAction = (id: string) => {
 
     const invalidateAll = () => {
         queryClient.invalidateQueries({ queryKey: ['pin', id] });
-        queryClient.invalidateQueries({ queryKey: ['pins'] });
-        queryClient.invalidateQueries({ queryKey: ['createdPin'] });
         queryClient.invalidateQueries({ queryKey: ['savedPin'] })
     };
 

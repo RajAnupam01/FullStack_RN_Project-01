@@ -20,12 +20,6 @@ export default function TabsLayout() {
                     <Entypo name="home" size={26} color={color} />
                 )
             }} />
-            <Tabs.Screen name="search" options={{title:'search',
-                tabBarIcon:({color})=>(
-                    <FontAwesome name="search" size={26} color={color} />
-                )
-            }} />
-           
             <Tabs.Screen name="createPost" options={{title:'Create',
                 tabBarIcon:({color})=>(
                     <AntDesign name="plus-circle" size={26} color={color} />

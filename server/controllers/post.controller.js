@@ -46,20 +46,7 @@ export const getAllPins = AsyncHandler(async (req, res) => {
     )
 })
 
-export const getOnePin = AsyncHandler(async (req, res) => {
-    const pinId = req.params.id;
-    if (!mongoose.Types.ObjectId.isValid(pinId)) {
-        throw new ApiError(400, "Invalid Pin Id")
-    }
-    const pin = await Pin.findById(pinId).populate("owner", "name avatar");
 
-    if (!pin) {
-        throw new ApiError(404, "No such Pin Exists.")
-    }
-    return res.json(
-        new ApiResponse(200, pin, "Single pin fetched successfully.")
-    )
-})
 
 export const getCategoryPins = AsyncHandler(async (req, res) => {
     const { category } = req.query;
@@ -86,114 +73,38 @@ export const getCategoryPins = AsyncHandler(async (req, res) => {
         )
     );
 });
-
-export const toggleSavePin = AsyncHandler(async (req, res) => {
+export const getOnePin = AsyncHandler(async (req, res) => {
     const userId = req.user._id;
     const pinId = req.params.id;
-
-    const user = await User.findById(userId);
-    if (!user) {
-        throw new ApiError(404, "User not found.")
+    if (!mongoose.Types.ObjectId.isValid(pinId)) {
+        throw new ApiError(400, "Invalid Pin Id")
     }
-    const pin = await Pin.findById(pinId);
+    const pin = await Pin.findById(pinId).populate("owner", "name avatar");
+
     if (!pin) {
-        throw new ApiError(404, "Pin not found.")
+        throw new ApiError(404, "No such Pin Exists.")
+
     }
-
-    const isSaved = user.saved.some(
-        id => id.equals(pinId)
-    );
-
-    if (isSaved) {
-        user.saved.pull(pinId)
-    } else {
-        user.saved.push(pinId)
-    }
-
-    await user.save({ validateBeforeSave: true });
-
-    return res.status(200).json(new ApiResponse(200, null, isSaved ? "Pin Saved" : "Pin Unsaved."))
-})
-
-export const toggleFollow = AsyncHandler(async (req, res) => {
-   const userId = req.user._id;
-   const targetId = req.params.id;
-   
-   const currentUser = await User.findById(userId);
-   if (!currentUser) {
-      throw new ApiError(404, "Current user not found");
-   }
-
-   const targetUser = await User.findById(targetId);
-   if (!targetUser) {
-      throw new ApiError(404, "This user doesn't exist.");
-   }
-
-   if (userId.toString() === targetId) {
-      throw new ApiError(400, "You cannot follow yourself.");
-   }
-   
-   const isFollowing = currentUser.following.some(
-     id => id.toString() === targetId
-   );
-
-   if (isFollowing) {
-      // UNFOLLOW
-      await User.findByIdAndUpdate(userId, {
-         $pull: { following: targetId }
-      });
-
-      await User.findByIdAndUpdate(targetId, {
-         $pull: { followers: userId }
-      });
-
-   } else {
-      // FOLLOW
-      await User.findByIdAndUpdate(userId, {
-         $addToSet: { following: targetId }
-      });
-
-      await User.findByIdAndUpdate(targetId, {
-         $addToSet: { followers: userId }
-      });
-   }
-
-   res.status(200).json(
-      new ApiResponse(
-         200,
-         { isFollowing: !isFollowing },
-         isFollowing
-            ? "User unfollowed successfully"
-            : "User followed successfully"
-      )
-   );
-});
-
-export const getSavedPins = AsyncHandler(async (req, res) => {
-    const userId = req.user._id;
-
-    const user = await User.findById(userId).populate("saved")
-
-    if (!user) throw new ApiError(404, "User not found.");
-
-    return res.status(200).json(new ApiResponse(200, user.saved, "saved pins fetched successfully."))
-})
-
-export const getCreatedPins = AsyncHandler(async (req, res) => {
-    const userId = req.user._id;
-
     const user = await User.findById(userId);
 
-    if (!user) {
-        throw new ApiError(404, "User not found.")
-    }
+    const isSaved = user.saved.some(id => id.equals(pinId));
 
-    const pins = await Pin.find({ owner: userId }).sort({ createdAt: -1 });
-    return res.status(200).json(
-        new ApiResponse(200, pins, "User pins fetched successfully.")
+    const isFollowing = user.following.some(id =>
+        id.equals(pin.owner._id)
     );
-})
 
+    const isLiked = pin.likes.some(id =>
+        id.equals(userId)
+    );
+    return res.json(
+        new ApiResponse(200, {
+            ...pin.toObject(),
+            isSaved,
+            isFollowing,
+            isLiked
+        }, "Single pin fetched successfully.")
+    )
+})
 export const toggleLikePin = AsyncHandler(async (req, res) => {
     const userId = req.user._id;
     const pinId = req.params.id;
@@ -225,4 +136,117 @@ export const toggleLikePin = AsyncHandler(async (req, res) => {
         )
     )
 })
+
+export const toggleSavePin = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const pinId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new ApiError(404, "User not found.")
+    }
+    const pin = await Pin.findById(pinId);
+    if (!pin) {
+        throw new ApiError(404, "Pin not found.")
+    }
+
+    const isSaved = user.saved.some(
+        id => id.equals(pinId)
+    );
+
+    if (isSaved) {
+        user.saved.pull(pinId)
+    } else {
+        user.saved.push(pinId)
+    }
+
+    await user.save({ validateBeforeSave: true });
+
+    return res.status(200).json(new ApiResponse(
+        200,
+        { isSaved: !isSaved },
+        isSaved ? "Pin Unsaved." : "Pin Saved."
+    ))
+})
+
+export const toggleFollow = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const targetId = req.params.id;
+
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+        throw new ApiError(404, "Current user not found");
+    }
+
+    const targetUser = await User.findById(targetId);
+    if (!targetUser) {
+        throw new ApiError(404, "This user doesn't exist.");
+    }
+
+    if (userId.toString() === targetId) {
+        throw new ApiError(400, "You cannot follow yourself.");
+    }
+
+    const isFollowing = currentUser.following.some(
+        id => id.toString() === targetId
+    );
+
+    if (isFollowing) {
+        // UNFOLLOW
+        await User.findByIdAndUpdate(userId, {
+            $pull: { following: targetId }
+        });
+
+        await User.findByIdAndUpdate(targetId, {
+            $pull: { followers: userId }
+        });
+
+    } else {
+        // FOLLOW
+        await User.findByIdAndUpdate(userId, {
+            $addToSet: { following: targetId }
+        });
+
+        await User.findByIdAndUpdate(targetId, {
+            $addToSet: { followers: userId }
+        });
+    }
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            { isFollowing: !isFollowing },
+            isFollowing
+                ? "User unfollowed successfully"
+                : "User followed successfully"
+        )
+    );
+});
+
+export const getSavedPins = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).populate("saved")
+
+    if (!user) throw new ApiError(404, "User not found.");
+
+    return res.status(200).json(new ApiResponse(200, user.saved, "saved pins fetched successfully."))
+})
+
+export const getCreatedPins = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "User not found.")
+    }
+
+    const pins = await Pin.find({ owner: userId }).sort({ createdAt: -1 });
+    return res.status(200).json(
+        new ApiResponse(200, pins, "User pins fetched successfully.")
+    );
+})
+
+
 

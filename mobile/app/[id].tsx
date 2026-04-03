@@ -1,178 +1,362 @@
-import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+} from 'react-native';
 import Screen from '@/components/Screen';
 import { useLocalSearchParams } from 'expo-router';
 import { useSinglePin } from '@/hooks/useSinglePin';
 import { usePinAction } from '@/hooks/usePinAction';
 import { useAuth } from '@/context/useAuth';
-
+import { useState } from 'react';
+import { useComment } from '@/hooks/useComment';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 const DetailScreen = () => {
-
-  const {user} = useAuth()
-
+  const { user } = useAuth();
   const { id } = useLocalSearchParams();
 
-  const { data: pin, isLoading } = useSinglePin(id as string)
-  console.log(pin)
+  const [content, setContent] = useState('');
+  const {
+    comments,
+    isLoading: isCommentsLoading,
+    addComment,
+    isAdding,
+  } = useComment(id as string);
 
-  const { likeMutation, followMutation, saveMutation } = usePinAction(id as string)
+  const handleComment = () => {
+    if (!content.trim()) {
+      Alert.alert('Please add some content to add Comment.');
+      return;
+    }
+    addComment(content.trim());
+    setContent('');
+  };
+
+  const { data: pin, isLoading } = useSinglePin(id as string);
+  const { likeMutation, followMutation, saveMutation } =
+    usePinAction(id as string);
 
   if (isLoading) {
-    return <ActivityIndicator />
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   if (!pin) {
-    return <Text>Not found.</Text>
+    return <Text style={{ textAlign: 'center' }}>Not found.</Text>;
   }
+
   return (
     <Screen>
-      <ScrollView
-        style={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        <Image
-          source={{ uri: pin.image }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* IMAGE */}
+        <Image source={{ uri: pin.image }} style={styles.image} resizeMode="cover" />
 
-        <View style={styles.mainFrame}>
-          <View style={styles.avatarFrame}>
-            <View style={styles.avatar}>
-              {pin.owner?.avatar ? (
-                <Image
-                  source={{ uri: pin.owner.avatar }}
-                  style={styles.avatarimg}
-                />
-              ) : (
-                <Text style={styles.initial}>
-                  {pin.owner?.name?.charAt(0).toUpperCase()}
-                </Text>
-              )}
+        {/* CONTENT */}
+        <View style={styles.content}>
+          {/* USER + FOLLOW */}
+          <View style={styles.mainFrame}>
+            <View style={styles.avatarFrame}>
+              <View style={styles.avatar}>
+                {pin.owner?.avatar ? (
+                  <Image source={{ uri: pin.owner.avatar }} style={styles.avatarimg} />
+                ) : (
+                  <Text style={styles.initial}>
+                    {pin.owner?.name?.charAt(0).toUpperCase()}
+                  </Text>
+                )}
+              </View>
+              <Text style={styles.avatarText}>{pin.owner?.name}</Text>
             </View>
 
-            <Text style={styles.avatarframetxt}>
-              {pin.owner?.name}
-            </Text>
+            <TouchableOpacity
+              onPress={() => followMutation.mutate(pin.owner._id)}
+              style={styles.followBtn}
+            >
+              <Text style={styles.followBtnTxt}>
+                {pin.isFollowing ? 'Following' : 'Follow'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={()=> followMutation.mutate(pin.owner._id)}
-            style={styles.followBtn}
-          >
-            <Text style={styles.followBtnTxt}>
-              {pin.isFollowing ? "Unfollow" : "Follow"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          {/* ACTIONS */}
+          <View style={styles.action}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => saveMutation.mutate()}>
+              <Text style={styles.actionText}>{pin.isSaved ? 'Saved ✓' : 'Save'}</Text>
+            </TouchableOpacity>
 
-        <View style={styles.action}>
-          <TouchableOpacity
-            style={styles.savedBtn}
-            onPress={()=> saveMutation.mutate()}
-          >
-            <Text style={styles.savedBtnTxt}>
-              {pin.isSaved ? "Unsave" : "Save"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={()=>likeMutation.mutate()}
-            style={styles.likebtn}
-          >
-            <Text style={styles.likedbtn}>
-             Like: {pin.likes.length}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.title}>{pin.title}</Text>
-
-        {pin.description && (
-          <Text style={styles.text}>{pin.description}</Text>
-        )}
-
-        {pin.category && (
-          <Text style={styles.text}>{pin.category}</Text>
-        )}
-
-        <View style={[styles.avatarFrame, { marginBottom: 20 }]}>
-          <View style={styles.avatar}>
-            <Image
-              source={{ uri: user?.avatar }}
-              style={styles.avatarimg}
-            />
+            <TouchableOpacity style={styles.actionBtn} onPress={() => likeMutation.mutate()}>
+              <Text style={styles.actionText}>❤️ {pin.likes.length}</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.avatarframetxt}>
-            {user?.name}
-          </Text>
+
+          {/* TITLE & DESCRIPTION */}
+          <Text style={styles.title}>{pin.title}</Text>
+          {pin.description && <Text style={styles.description}>{pin.description}</Text>}
+
+          {/* ADD COMMENT */}
+          <View style={styles.bottomUser}>
+            <View style={styles.avatar}>
+              <Image source={{ uri: user?.avatar }} style={styles.avatarimg} />
+            </View>
+            <Text style={styles.avatarText}>{user?.name}</Text>
+            <View style={styles.addComment}>
+              <TextInput
+                style={styles.addCommentInput}
+                placeholder="Enter your comment"
+                value={content}
+                onChangeText={setContent}
+              />
+              <TouchableOpacity
+                style={[styles.submitComment, { opacity: isAdding ? 0.5 : 1 }]}
+                onPress={handleComment}
+                disabled={isAdding}
+              >
+                <AntDesign name="arrow-up" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* COMMENTS */}
+          <View style={styles.commentsContainer}>
+            {isCommentsLoading ? (
+              <ActivityIndicator />
+            ) : comments?.length === 0 ? (
+              <Text style={styles.emptyComments}>No comments yet. Be the first one!</Text>
+            ) : (
+              comments.map((item: any) => (
+                <View key={item._id} style={styles.commentItem}>
+                  <View style={styles.commentAvatar}>
+                    {item.user?.avatar ? (
+                      <Image source={{ uri: item.user.avatar }} style={styles.avatarimg} />
+                    ) : (
+                      <Text style={styles.initial}>
+                        {item.user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.commentTextContainer}>
+                    <Text style={styles.commentName}>{item.user?.name || 'User'}</Text>
+                    <Text style={styles.commentContent}>{item.content}</Text>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
         </View>
       </ScrollView>
     </Screen>
   );
-}
+};
 
 export default DetailScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  image: { width: '100%' ,height:'150%'},
+  container: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+  },
+
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  image: {
+    width: '100%',
+    height: 360,
+    borderRadius: 16,
+    marginVertical: 10,
+  },
+
+  content: {
+    paddingHorizontal: 15,
+  },
+
   mainFrame: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    margin: 10
+    marginTop: 10,
   },
+
   avatarFrame: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
   },
+
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#ccc',
+    width: 45,
+    height: 45,
+    borderRadius: 22,
+    backgroundColor: '#ddd',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    overflow: 'hidden',
   },
+
   avatarimg: {
     width: '100%',
     height: '100%',
-    borderRadius: 20
   },
-  initial: { fontWeight: 'bold' },
-  avatarframetxt: { marginLeft: 10 },
+
+  initial: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#555',
+  },
+
+  avatarText: {
+    marginLeft: 10,
+    fontWeight: '600',
+    fontSize: 15,
+    color: '#333',
+  },
+
   followBtn: {
-    backgroundColor: 'black',
-    padding: 10,
-    borderRadius: 8
+    backgroundColor: '#000',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
   },
-  followBtnTxt: { color: 'white' },
+
+  followBtnTxt: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+
   action: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10
+    marginTop: 20,
   },
-  savedBtn: {
-    padding: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 8
+
+  actionBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  savedBtnTxt: {},
-  likebtn: {
-    padding: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 8
+
+  actionText: {
+    fontWeight: '500',
+    fontSize: 14,
   },
-  likedbtn: {},
+
   title: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    margin: 10
+    marginTop: 20,
+    color: '#111',
   },
-  text: {
-    marginHorizontal: 10,
-    marginBottom: 5
-  }
+
+  description: {
+    fontSize: 15,
+    color: '#666',
+    lineHeight: 22,
+    marginVertical: 10,
+  },
+
+  bottomUser: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 15,
+  },
+
+  addComment: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginLeft: 15,
+  },
+
+  addCommentInput: {
+    flex: 1,
+    fontSize: 14,
+    paddingVertical: 0,
+    color: '#333',
+  },
+
+  submitComment: {
+    backgroundColor: '#e60023',
+    padding: 8,
+    borderRadius: 20,
+    marginLeft: 5,
+  },
+
+  commentsContainer: {
+    marginTop: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+
+  commentItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+
+  commentAvatar: {
+    width: 35,
+    height: 35,
+    borderRadius: 17,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+
+  commentTextContainer: {
+    marginLeft: 10,
+    flex: 1,
+    backgroundColor: '#f9f9f9',
+    padding: 10,
+    borderRadius: 10,
+  },
+
+  commentName: {
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#222',
+    marginBottom: 2,
+  },
+
+  commentContent: {
+    fontSize: 14,
+    color: '#555',
+  },
+
+  emptyComments: {
+    textAlign: 'center',
+    color: 'gray',
+    fontStyle: 'italic',
+    marginVertical: 10,
+  },
 });
