@@ -9,3 +9,8 @@ export const fetchCommment = async(id:string) =>{
     const res = await axiosInstance.get(`/comment/getComment/${id}`)
     return res.data
 }
+
+export const deleteComment = async(id:string) =>{
+    const res = await axiosInstance.delete(`/comment/removeComment/${id}`)
+    return res.data
+}

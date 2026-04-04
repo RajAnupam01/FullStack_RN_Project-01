@@ -61,3 +61,23 @@ export const getComments = AsyncHandler(async (req, res) => {
     );
 });
 
+export const deleteComment = AsyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    const commentId = req.params.id;
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+        throw new ApiError(404, "No such comment exists.");
+    }
+
+    if (comment.user.toString() !== userId.toString()) {
+        throw new ApiError(403, "You are not authorized to delete this comment.");
+    }
+
+    await Comment.findByIdAndDelete(commentId);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, null, "Comment deleted successfully."));
+});

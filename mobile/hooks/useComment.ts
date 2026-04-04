@@ -1,4 +1,4 @@
-import { createComment, fetchCommment } from "@/services/commentApi";
+import { createComment, deleteComment, fetchCommment } from "@/services/commentApi";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useComment = (pinId: string) => {
@@ -23,10 +23,23 @@ export const useComment = (pinId: string) => {
             })
         }
     })
+    const deleteMutation = useMutation({
+        mutationFn:(commentId:string) =>
+            deleteComment(commentId),
+
+        onSuccess:() => {
+           queryClient.invalidateQueries({
+                queryKey:['comments',pinId]
+           })
+        }
+    })
+
     return {
         comments: query.data || [],
         isLoading: query.isLoading,
         addComment: mutation.mutate,
-        isAdding: mutation.isPending
+        isAdding: mutation.isPending,
+        deleteComment:deleteMutation.mutate,
+        isDeleting:deleteMutation.isPending
     }
 }

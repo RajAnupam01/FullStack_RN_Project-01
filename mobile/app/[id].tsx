@@ -17,6 +17,7 @@ import { useAuth } from '@/context/useAuth';
 import { useState } from 'react';
 import { useComment } from '@/hooks/useComment';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const DetailScreen = () => {
   const { user } = useAuth();
@@ -28,6 +29,9 @@ const DetailScreen = () => {
     isLoading: isCommentsLoading,
     addComment,
     isAdding,
+    deleteComment,
+    isDeleting
+
   } = useComment(id as string);
 
   const handleComment = () => {
@@ -145,9 +149,18 @@ const DetailScreen = () => {
                     )}
                   </View>
                   <View style={styles.commentTextContainer}>
-                    <Text style={styles.commentName}>{item.user?.name || 'User'}</Text>
-                    <Text style={styles.commentContent}>{item.content}</Text>
+                    <View>
+                      <Text style={styles.commentName}>{item.user?.name || 'User'}</Text>
+                      <Text style={styles.commentContent}>{item.content}</Text>
+                    </View>
+                    <View>{item.user?._id === user?._id && (
+                      <TouchableOpacity onPress={() => deleteComment(item._id)} disabled={isDeleting}  >
+                        <FontAwesome5 name="trash" size={16} color="red" />
+                      </TouchableOpacity>
+                    )}
+                    </View>
                   </View>
+
                 </View>
               ))
             )}
@@ -339,6 +352,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     padding: 10,
     borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
 
   commentName: {
@@ -359,4 +375,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginVertical: 10,
   },
+
 });
