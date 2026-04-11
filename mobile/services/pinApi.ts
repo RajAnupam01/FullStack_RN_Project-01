@@ -11,6 +11,13 @@ export const getSinglePin = async (id: string) => {
   return res.data
 }
 
+export const editPin = async(id:string,data:{title?:string,description?:string}) =>{
+  const res = await axiosInstance.patch(`/pin/edit/${id}`,data)
+  return res.data
+}
+
+
+
 export const createPin = async (data: any) => {
   const formData = new FormData();
 

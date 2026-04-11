@@ -33,6 +33,34 @@ export const createPin = AsyncHandler(async (req, res) => {
     )
 })
 
+export const editPin = AsyncHandler(async (req, res) => {
+
+    const pinId = req.params.id;
+    const { title, description } = req.body;
+
+    if (!title && !description) {
+        throw new ApiError(400, "please enter newdata to edit.")
+    }
+    const pin = await Pin.findById(pinId)
+
+    if (!pin) {
+        throw new ApiError(404, "Pin not found.")
+    }
+    if (pin.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(401, "Unauthorized access.")
+    }
+    if (title) {
+        pin.title = title;
+    }
+    if (description) {
+        pin.description = description
+    }
+    await pin.save({ validateBeforeSave: true })
+    return res.status(200).json(
+        new ApiResponse(200, pin, "Pin updated successfully.")
+    );
+})
+
 
 export const getAllPins = AsyncHandler(async (req, res) => {
     const pins = await Pin.find().sort({ createdAt: -1 });

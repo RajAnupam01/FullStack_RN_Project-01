@@ -8,6 +8,7 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  Modal,
 } from 'react-native';
 import Screen from '@/components/Screen';
 import { useLocalSearchParams } from 'expo-router';
@@ -16,12 +17,49 @@ import { usePinAction } from '@/hooks/usePinAction';
 import { useAuth } from '@/context/useAuth';
 import { useState } from 'react';
 import { useComment } from '@/hooks/useComment';
+import { useEditPin } from '@/hooks/useEditPin';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 const DetailScreen = () => {
   const { user } = useAuth();
   const { id } = useLocalSearchParams();
+
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+
+  const { mutate: editPin, isPending: isUpdating } = useEditPin();
+
+  const startEditing = (pin: any) => {
+    setTitle(pin.title);
+    setDescription(pin.description || '');
+    setIsEditing(true);
+  };
+
+  const handleUpdate = () => {
+    if (!title.trim() && !description.trim()) {
+      Alert.alert('Error', 'Please enter something');
+      return;
+    }
+
+    editPin(
+      {
+        id: pin._id,
+        data: {
+          title: title.trim(),
+          description: description.trim(),
+        },
+      },
+      {
+        onSuccess: () => {
+          Alert.alert('Success', 'Pin updated');
+          setIsEditing(false);
+        },
+      }
+    );
+  };
 
   const [content, setContent] = useState('');
   const {
@@ -33,6 +71,8 @@ const DetailScreen = () => {
     isDeleting
 
   } = useComment(id as string);
+
+
 
   const handleComment = () => {
     if (!content.trim()) {
@@ -94,6 +134,14 @@ const DetailScreen = () => {
 
           {/* ACTIONS */}
           <View style={styles.action}>
+            {pin.owner?._id === user?._id && (
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={() => startEditing(pin)}
+              >
+                <Text style={styles.actionText}>✏️ Edit</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.actionBtn} onPress={() => saveMutation.mutate()}>
               <Text style={styles.actionText}>{pin.isSaved ? 'Saved ✓' : 'Save'}</Text>
             </TouchableOpacity>
@@ -167,6 +215,46 @@ const DetailScreen = () => {
           </View>
         </View>
       </ScrollView>
+      <Modal visible={isEditing} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+
+            <Text style={styles.modalTitle}>Edit Pin</Text>
+
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Title"
+            />
+
+            <TextInput
+              style={[styles.input, { height: 100 }]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Description"
+              multiline
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setIsEditing(false)}>
+                <Text>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleUpdate}
+                disabled={isUpdating}
+                style={[styles.saveBtn, { opacity: isUpdating ? 0.6 : 1 }]}
+              >
+                <Text style={{ color: 'white' }}>
+                  {isUpdating ? 'Saving...' : 'Save'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 };
@@ -374,6 +462,43 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontStyle: 'italic',
     marginVertical: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  saveBtn: {
+    backgroundColor: 'black',
+    padding: 10,
+    borderRadius: 8,
   },
 
 });

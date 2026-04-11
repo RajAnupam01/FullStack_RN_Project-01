@@ -14,7 +14,7 @@ type Props = {
   isHome?: boolean
 };
 
-const PinList = ({ data,isHome=false }: Props) => {
+const PinList = ({ data, isHome = false }: Props) => {
   const router = useRouter();
 
   return (
@@ -34,6 +34,7 @@ const PinList = ({ data,isHome=false }: Props) => {
 
       }}
       showsVerticalScrollIndicator={false}
+      
     />
   );
 };
