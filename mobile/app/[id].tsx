@@ -20,10 +20,42 @@ import { useComment } from '@/hooks/useComment';
 import { useEditPin } from '@/hooks/useEditPin';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useDeletePin } from '@/hooks/useDeletePin';
+import { router } from "expo-router";
 
 const DetailScreen = () => {
   const { user } = useAuth();
   const { id } = useLocalSearchParams();
+
+
+  const { mutate: deletePin, isPending: isDeletingPin } = useDeletePin()
+
+  const handleRemovePin = () => {
+    Alert.alert(
+      "Delete Pin",
+      "Are you sure you want to delete this pin?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deletePin(pin._id, {
+              onSuccess: () => {
+                router.back();
+              },
+              onError: (err: any) => {
+                Alert.alert(
+                  "Error",
+                  err?.message || "Failed to delete the Pin."
+                );
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
 
 
   const [isEditing, setIsEditing] = useState(false);
@@ -83,6 +115,10 @@ const DetailScreen = () => {
     setContent('');
   };
 
+
+
+
+
   const { data: pin, isLoading } = useSinglePin(id as string);
   const { likeMutation, followMutation, saveMutation } =
     usePinAction(id as string);
@@ -123,7 +159,16 @@ const DetailScreen = () => {
             </View>
 
             <TouchableOpacity
-              onPress={() => followMutation.mutate(pin.owner._id)}
+              onPress={() =>
+                followMutation.mutate(pin.owner._id, {
+                  onError: (err: any) => {
+                    const message =
+                      err?.response?.data?.message || "Something went wrong";
+
+                    Alert.alert("Error", message);
+                  },
+                })
+              }
               style={styles.followBtn}
             >
               <Text style={styles.followBtnTxt}>
@@ -135,12 +180,25 @@ const DetailScreen = () => {
           {/* ACTIONS */}
           <View style={styles.action}>
             {pin.owner?._id === user?._id && (
-              <TouchableOpacity
-                style={styles.actionBtn}
-                onPress={() => startEditing(pin)}
-              >
-                <Text style={styles.actionText}>✏️ Edit</Text>
-              </TouchableOpacity>
+              <>
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => startEditing(pin)}
+                >
+                  <Text style={styles.actionText}>✏️ Edit</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={handleRemovePin}
+                  disabled={isDeletingPin}
+                >
+                  <Text style={[styles.actionText, { color: "red" }]}>
+                    {isDeletingPin ? "Deleting..." : "🗑 Delete"}
+                  </Text>
+                </TouchableOpacity>
+              </>
+
             )}
             <TouchableOpacity style={styles.actionBtn} onPress={() => saveMutation.mutate()}>
               <Text style={styles.actionText}>{pin.isSaved ? 'Saved ✓' : 'Save'}</Text>
@@ -214,7 +272,7 @@ const DetailScreen = () => {
             )}
           </View>
         </View>
-      </ScrollView>
+      </ScrollView >
       <Modal visible={isEditing} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -255,7 +313,7 @@ const DetailScreen = () => {
           </View>
         </View>
       </Modal>
-    </Screen>
+    </Screen >
   );
 };
 

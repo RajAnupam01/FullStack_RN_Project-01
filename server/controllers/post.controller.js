@@ -3,8 +3,9 @@ import Pin from "../models/pin.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
-import { uploadImageToCloudinary } from "../utils/cloudinary.js";
+import { deleteImageFromCloudinary, uploadImageToCloudinary } from "../utils/cloudinary.js";
 import User from "../models/user.model.js";
+import Comment from "../models/comment.model.js";
 
 
 export const createPin = AsyncHandler(async (req, res) => {
@@ -32,6 +33,50 @@ export const createPin = AsyncHandler(async (req, res) => {
         new ApiResponse(201, pin, "Pin Created Successfully.")
     )
 })
+
+export const removePin = AsyncHandler(async (req, res) => {
+    const pinId = req.params.id;
+
+    const pin = await Pin.findById(pinId);
+
+    if (!pin) {
+        throw new ApiError(404, "No such pin exist.")
+    }
+
+    if (pin.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(401, "You are not authorized to delete the pin.")
+    }
+
+    if (pin.imagePublicId) {
+        try {
+            await deleteImageFromCloudinary(pin.imagePublicId);
+        } catch (error) {
+            throw new ApiError(500, "failed to delete the pin image.")
+        }
+    }
+
+    if (pin.imagePublicId) {
+        try {
+            await deleteImageFromCloudinary(pin.imagePublicId);
+        } catch (error) {
+            throw new ApiError(500, "Failed to delete the pin image.");
+        }
+    }
+    await Comment.deleteMany({ pin: pinId })
+
+    await User.updateMany(
+        { saved: pinId },
+        { $pull: { saved: pinId } }
+    );
+
+    await pin.deleteOne();
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, null, "Pin deleted successfully."));
+})
+
+
 
 export const editPin = AsyncHandler(async (req, res) => {
 
@@ -211,7 +256,7 @@ export const toggleFollow = AsyncHandler(async (req, res) => {
         throw new ApiError(404, "This user doesn't exist.");
     }
 
-    if (userId.toString() === targetId) {
+    if (userId.toString() === targetId.toString()) {
         throw new ApiError(400, "You cannot follow yourself.");
     }
 

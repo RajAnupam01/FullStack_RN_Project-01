@@ -16,7 +16,10 @@ export const editPin = async(id:string,data:{title?:string,description?:string})
   return res.data
 }
 
-
+export const removePin = async(id:string)=>{
+  const res = await axiosInstance.delete(`/pin/remove/${id}`)
+  return res.data
+}
 
 export const createPin = async (data: any) => {
   const formData = new FormData();
