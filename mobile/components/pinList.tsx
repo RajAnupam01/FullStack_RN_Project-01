@@ -1,4 +1,4 @@
-import { FlatList } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 import Card from './card';
@@ -19,6 +19,7 @@ const PinList = ({ data, isHome = false }: Props) => {
 
   return (
     <FlatList
+      style={{ flex: 1 }}
       data={data}
       renderItem={({ item }) => (
         <Card
@@ -34,7 +35,17 @@ const PinList = ({ data, isHome = false }: Props) => {
 
       }}
       showsVerticalScrollIndicator={false}
-      
+      ListEmptyComponent={
+        <View style={{ flex: 1, alignItems: 'center', marginTop: 50 }}>
+          <Text style={{ fontSize: 16, color: '#666' }}>
+            Nothing to show
+          </Text>
+          <Text style={{ marginTop: 8, color: '#999' }}>
+            Be the first one to create !
+          </Text>
+        </View>
+      }
+
     />
   );
 };

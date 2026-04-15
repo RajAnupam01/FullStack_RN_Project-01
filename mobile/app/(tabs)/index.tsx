@@ -18,17 +18,19 @@ const Home = () => {
     return (
       <View>
         <Text>Something went wrong</Text>
+        <Text>{(error as Error)?.message}</Text>
         <Text onPress={() => refetch()}>Retry</Text>
       </View>
     );
   }
 
-  return (
-    <Screen>
-      {isFetching && <ActivityIndicator size="small" />} 
-      <PinList data={pins || []} isHome />
-    </Screen>
-  );
+
+return (
+  <Screen>
+    {isFetching && <ActivityIndicator size="small" />}
+    <PinList data={pins || []} isHome />
+  </Screen>
+);
 };
 
 export default Home;
