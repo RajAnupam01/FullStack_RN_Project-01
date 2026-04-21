@@ -4,11 +4,18 @@ import Screen from '@/components/Screen'
 import * as ImagePicker from "expo-image-picker"
 import { useCreatePin } from '@/hooks/useCreatePin'
 import { router } from 'expo-router'
+import {
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
+
 
 
 const CreatePost = () => {
 
-  const {mutate:createPinMutation, isPending} = useCreatePin()
+  const { mutate: createPinMutation, isPending } = useCreatePin()
 
 
   const [title, setTitle] = useState("")
@@ -17,7 +24,7 @@ const CreatePost = () => {
   const [image, setImage] = useState<any>(null)
 
 
-  
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -36,9 +43,9 @@ const CreatePost = () => {
       return
     }
     createPinMutation(
-      {title,description,category,image},
+      { title, description, category, image },
       {
-        onSuccess:(res) => {
+        onSuccess: (res) => {
           alert(res.message);
           setTitle('')
           setDescription('')
@@ -47,8 +54,8 @@ const CreatePost = () => {
 
           router.back()
         },
-        onError:(error:any) =>{
-          const message =  error?.response?.data?.message || error?.message || "Creation failed.";
+        onError: (error: any) => {
+          const message = error?.response?.data?.message || error?.message || "Creation failed.";
           alert(message)
         }
       }
@@ -57,65 +64,72 @@ const CreatePost = () => {
 
   return (
     <Screen>
-      <ScrollView
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ flexGrow: 1 }}
-              keyboardShouldPersistTaps="handled"
-     >
-      <View style={styles.container}>
-
-        <Text style={styles.header}>Create Post</Text>
-
-        <Pressable onPress={pickImage} style={styles.imageWrapper}>
-          {image ? (
-            <Image source={{ uri: image.uri }} style={styles.image} />
-          ) : (
-            <View style={styles.placeholder}>
-              <Text style={styles.placeholderText}>Tap to upload image</Text>
-            </View>
-          )}
-        </Pressable>
-
-        <View style={styles.form}>
-
-          <TextInput
-            placeholder='Title'
-            value={title}
-            onChangeText={setTitle}
-            style={styles.input}
-            placeholderTextColor="#888"
-          />
-
-          <TextInput
-            placeholder='Description'
-            value={description}
-            onChangeText={setDescription}
-            style={[styles.input, styles.textArea]}
-            multiline
-          />
-
-          <TextInput
-            placeholder='Category'
-            value={category}
-            onChangeText={setCategory}
-            style={styles.input}
-          />
-
-          <TouchableOpacity 
-            style={styles.button} 
-            onPress={handleSubmitPin} 
-            disabled={isPending}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
           >
-            {isPending ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Submit</Text>
-            )}
-          </TouchableOpacity>
+            <View style={styles.container}>
 
-        </View>
-      </View>
-      </ScrollView>
+              <Text style={styles.header}>Create Post</Text>
+
+              <Pressable onPress={pickImage} style={styles.imageWrapper}>
+                {image ? (
+                  <Image source={{ uri: image.uri }} style={styles.image} />
+                ) : (
+                  <View style={styles.placeholder}>
+                    <Text style={styles.placeholderText}>Tap to upload image</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <View style={styles.form}>
+
+                <TextInput
+                  placeholder='Title'
+                  value={title}
+                  onChangeText={setTitle}
+                  style={styles.input}
+                  placeholderTextColor="#888"
+                />
+
+                <TextInput
+                  placeholder='Description'
+                  value={description}
+                  onChangeText={setDescription}
+                  style={[styles.input, styles.textArea]}
+                  multiline
+                />
+
+                <TextInput
+                  placeholder='Category'
+                  value={category}
+                  onChangeText={setCategory}
+                  style={styles.input}
+                />
+
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleSubmitPin}
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Submit</Text>
+                  )}
+                </TouchableOpacity>
+
+              </View>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Screen>
   )
 }

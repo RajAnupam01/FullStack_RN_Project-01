@@ -16,11 +16,17 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { Link, router } from 'expo-router';
 import { useAuth } from '@/context/useAuth';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
+} from 'react-native';
 
 
 const Login = () => {
 
-  const {login} = useAuth()
+  const { login } = useAuth()
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,19 +36,19 @@ const Login = () => {
   const [focusedInput, setFocusedInput] = useState(null);
 
 
-  const handleRegister = async() => {
+  const handleRegister = async () => {
     setLoading(true);
     if (!email || !password) {
-        alert('All fields are necessary to register');
-        return;
-      }
+      alert('All fields are necessary to register');
+      return;
+    }
     try {
-      const res = await login(email,password)
+      const res = await login(email, password)
       Alert.alert(res.message)
       router.replace("/(tabs)")
-    } catch (error:any) {
-     const message = error?.response?.data?.message || "Login failed";
-     alert(message)
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Login failed";
+      alert(message)
     } finally {
       setLoading(false);
     }
@@ -50,107 +56,109 @@ const Login = () => {
 
   return (
     <Screen>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      ></KeyboardAvoidingView>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView>
+          <View style={styles.container}>
 
-          <ImageBackground
-            source={{
-              uri: 'https://i.pinimg.com/originals/69/ce/06/69ce06ac82f09617e4ce7e9babc69a13.png'
-            }}
-            style={styles.header}
-            imageStyle={{ opacity: 0.2 }} 
-          >
-            <View style={styles.headerContent}>
-              <Image
-                source={{
-                  uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5PrH8T969Xabc4RqVzfW_V8ZPMp7sM8cSyg&s'
-                }}
-                style={styles.img}
-              />
-              <Text style={styles.txtheader}>PinSphere</Text>
-            </View>
-          </ImageBackground>
-
-
-          <View style={styles.main}>
-            <Text style={styles.txtmain}>Welcome Back</Text>
-
-          </View>
-
-
-          <View style={styles.form}>
-
-
-            {/* Email */}
-            <View
-              style={[
-                styles.inputContainer,
-                focusedInput === 'email' && styles.focused
-              ]}
+            <ImageBackground
+              source={{
+                uri: 'https://i.pinimg.com/originals/69/ce/06/69ce06ac82f09617e4ce7e9babc69a13.png'
+              }}
+              style={styles.header}
+              imageStyle={{ opacity: 0.2 }}
             >
-              <MaterialCommunityIcons name="email-outline" size={18} color="#666" />
-              <TextInput
-                placeholder="Email"
-                placeholderTextColor="#999"
-                style={styles.textInput}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-
-              />
-            </View>
-
-            {/* Password */}
-            <View
-              style={[
-                styles.inputContainer,
-                focusedInput === 'password' && styles.focused
-              ]}
-            >
-              <Entypo name="lock" size={18} color="#666" />
-              <TextInput
-                placeholder="Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showPassword}
-                style={styles.textInput}
-                value={password}
-                onChangeText={setPassword}
-
-              />
-
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Feather
-                  name={showPassword ? 'eye-off' : 'eye'}
-                  size={18}
-                  color="#666"
+              <View style={styles.headerContent}>
+                <Image
+                  source={{
+                    uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5PrH8T969Xabc4RqVzfW_V8ZPMp7sM8cSyg&s'
+                  }}
+                  style={styles.img}
                 />
+                <Text style={styles.txtheader}>PinSphere</Text>
+              </View>
+            </ImageBackground>
+
+
+            <View style={styles.main}>
+              <Text style={styles.txtmain}>Welcome Back</Text>
+
+            </View>
+
+
+            <View style={styles.form}>
+
+
+              {/* Email */}
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'email' && styles.focused
+                ]}
+              >
+                <MaterialCommunityIcons name="email-outline" size={18} color="#666" />
+                <TextInput
+                  placeholder="Email"
+                  placeholderTextColor="#999"
+                  style={styles.textInput}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+
+                />
+              </View>
+
+              {/* Password */}
+              <View
+                style={[
+                  styles.inputContainer,
+                  focusedInput === 'password' && styles.focused
+                ]}
+              >
+                <Entypo name="lock" size={18} color="#666" />
+                <TextInput
+                  placeholder="Password"
+                  placeholderTextColor="#999"
+                  secureTextEntry={!showPassword}
+                  style={styles.textInput}
+                  value={password}
+                  onChangeText={setPassword}
+
+                />
+
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Feather
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={18}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Button */}
+              <TouchableOpacity
+                style={[styles.submitBtn, loading && { opacity: 0.7 }]}
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                <Text style={styles.submitBtnTxt}>
+                  {loading ? 'Please wait...' : 'Login'}
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Button */}
-            <TouchableOpacity
-              style={[styles.submitBtn, loading && { opacity: 0.7 }]}
-              onPress={handleRegister}
-              disabled={loading}
-            >
-              <Text style={styles.submitBtnTxt}>
-                {loading ? 'Please wait...' : 'Login'}
-              </Text>
-            </TouchableOpacity>
+            {/* Footer */}
+            <Link href="/register" style={styles.footertxt}>
+              Don't have an account
+              <Text style={styles.loginTxt}> Sign Up</Text>
+            </Link>
           </View>
-
-          {/* Footer */}
-          <Link href="/register" style={styles.footertxt}>
-            Don't have an account
-            <Text style={styles.loginTxt}> Sign Up</Text>
-          </Link>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </Screen>
   );
 };
@@ -188,7 +196,7 @@ const styles = StyleSheet.create({
   },
 
   txtheader: {
-    
+
     fontSize: 20,
     fontWeight: '900',
   },
