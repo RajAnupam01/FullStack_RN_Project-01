@@ -224,3 +224,9 @@ cd mobile
 npm install
 npx expo start
 ```
+
+## 📱 App Demo
+
+Here’s a quick walkthrough of the app 👇
+
+https://user-images.githubusercontent.com/your-username/demo-video.mp4
