@@ -54,6 +54,7 @@ This project goes beyond a simple clone. It simulates a real-world content-shari
 ## 📁 Project Structure
 
 ### 📱 Mobile (Frontend)
+```
 mobile/
 │
 ├── app/
@@ -106,8 +107,9 @@ mobile/
 │
 ├── utils/
 │   └── storage.ts
-
+```
 ### 🖥 Backend (Server)
+```
 server/
 │
 ├── config/
@@ -146,7 +148,7 @@ server/
 ├── constants.js
 └── .env
 
-
+```
 ---
 
 ## 🔐 Authentication Flow
